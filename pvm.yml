@@ -1,0 +1,32 @@
+__version__: 0.2
+1:
+  rstudioapi: 0.6
+  magrittr: 1.5
+  brew: 1.0-6
+  BH: 1.62.0-1
+  DSRTeacher: 0.1.0
+  commonmark: 1.2
+  openssl: 0.9.6
+  assertthat: 0.1
+2:
+  getPass: 0.1-1
+  R6: 2.2.0
+  digest: 0.6.12
+  curl: 2.3
+  mime: 0.5
+  backports: 1.0.5
+3:
+  rprojroot: 1.2
+4:
+  stringi: 1.1.5
+5:
+  Rcpp: 0.12.10
+  stringr: 1.2.0
+  crayon: 1.3.2
+  jsonlite: 1.4
+6:
+  xml2: 1.1.1
+  httr: 1.2.1
+  desc: 1.1.0
+7:
+  roxygen2: 6.0.1
