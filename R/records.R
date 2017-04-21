@@ -110,40 +110,45 @@ get.progress.table <- function(records, key = NULL) {
       result$comment[i] <- comment
     } else {
       result$status[i] <- "O"
-      time.enter <- dplyr::filter(.df, type == 0) %>%
-        `[[`("created_at") %>%
-        min()
-      time.finish <- dplyr::filter(.df, type == 1) %>%
-        `[[`("created_at") %>%
-        min()
-      result$finish.time[i] <- format(time.finish)
-      result$duration[i] <- difftime(time.finish, time.enter, units = "secs") %>%
-        as.numeric()
-      comment <- sprintf("The student finished this course %d times. ", dplyr::filter(.df, type == 1) %>% nrow())
-      log <- dplyr::filter(.df, type == 1) %>%
-        `[[`("log") %>%
-        lapply(jsonlite::fromJSON)
-      skip.last.count <- sapply(log, function(obj) {
-        tail(obj$skipped, 1) %>%
-          .null.to.0()
-      }) %>% sum()
-      comment <- sprintf("The student skip the last challange %d times. ", skip.last.count) %>%
-        append(x = comment)
-      skip.count <- sapply(log, function(obj) {
-        obj$skipped %>%
-          .null.to.0() %>%
+      if (sum(.df$type == 0) == 0) {
+        # no record of entering
+        result$comment[i] <- "There is no record of entering. "
+      } else {
+        time.enter <- dplyr::filter(.df, type == 0) %>%
+          `[[`("created_at") %>%
+          min()
+        time.finish <- dplyr::filter(.df, type == 1) %>%
+          `[[`("created_at") %>%
+          min()
+        result$finish.time[i] <- format(time.finish)
+        result$duration[i] <- difftime(time.finish, time.enter, units = "secs") %>%
+          as.numeric()
+        comment <- sprintf("The student finished this course %d times. ", dplyr::filter(.df, type == 1) %>% nrow())
+        log <- dplyr::filter(.df, type == 1) %>%
+          `[[`("log") %>%
+          lapply(jsonlite::fromJSON)
+        skip.last.count <- sapply(log, function(obj) {
+          tail(obj$skipped, 1) %>%
+            .null.to.0()
+        }) %>% sum()
+        comment <- sprintf("The student skip the last challange %d times. ", skip.last.count) %>%
+          append(x = comment)
+        skip.count <- sapply(log, function(obj) {
+          obj$skipped %>%
+            .null.to.0() %>%
+            sum()
+        })
+        comment <- sprintf("The student totally skip %d times. ", skip.count) %>%
+          append(x = comment)
+        restore.count <- sapply(log, function(obj) {
+          length(obj$restore_timestamp)
+        }) %>%
           sum()
-      })
-      comment <- sprintf("The student totally skip %d times. ", skip.count) %>%
-        append(x = comment)
-      restore.count <- sapply(log, function(obj) {
-        length(obj$restore_timestamp)
-      }) %>%
-        sum()
-      comment <- sprintf("The student totally restore %d times. ", restore.count) %>%
-        append(x = comment)
-      comment %<>% paste(collapse = "\n")
-      result$comment[i] <- comment
+        comment <- sprintf("The student totally restore %d times. ", restore.count) %>%
+          append(x = comment)
+        comment %<>% paste(collapse = "\n")
+        result$comment[i] <- comment
+      }
     }
   }
   result
