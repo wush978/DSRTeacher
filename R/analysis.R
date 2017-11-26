@@ -2,6 +2,7 @@
 #'@export
 #'@description A named list. The name is the course name in the records. The value is another list,
 #'where each list is the object returned from applying \code{yaml::yaml.load_file} to the course sources.
+#'@name course.sources
 NULL
 
 #'@export
