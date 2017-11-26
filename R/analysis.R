@@ -1,3 +1,9 @@
+#'@title Source of Courses
+#'@export
+#'@description A named list. The name is the course name in the records. The value is another list,
+#'where each list is the object returned from applying \code{yaml::yaml.load_file} to the course sources.
+NULL
+
 #'@export
 DSR.lessons <- sprintf(
   "DataScienceAndR:%s",
@@ -20,6 +26,7 @@ DSR.lessons <- sprintf(
 #'  \item question.no The number of the question
 #'  \item user_id The id of the student
 #'  \item skipped Whether the question is skipped or not
+#'  \item source.position integer. The index of which part of source found in \code{course.source}
 #'}
 #'Note that the students might do the question multiple times, so
 #'there might be multiple rows for the specific course, question.no and user_id.
@@ -31,12 +38,23 @@ DSR.lessons <- sprintf(
 #'@param lessons The character vector of the courses to be analyzed.
 #'@param course.source named list. The name is the course name.
 #'The value is the root of the swirl course directory.
+#'
+#'@examples
+#'\dontrun{
+#'login("wush")
+#'records <- get.records()
+#'skipped.result <- skipped.analysis(records)
+#'library(dplyr)
+#'group_by(skipped.result, course, question.no, user_id) %>%
+#'  summarise(is.skipped = all(skipped)) %>% # if the student does not skip once, then I recognize that he/she did the question.
+#'  group_by(course, question.no) %>%
+#'  summarise(skip.ratio = mean(is.skipped)) %>%
+#'  arrange(desc(skip.ratio))
+#'}
 skipped.analysis <- function(
   records, students = NULL,
   lessons = DSR.lessons,
-  course.source = list(
-    "DataScienceAndR" = "https://raw.githubusercontent.com/wush978/DataScienceAndR/course"
-    )
+  course.source = course.sources
   ) {
   if (is.null(students)) students <- unique(records$user_id)
   as.data.frame(records) %>%
@@ -48,17 +66,8 @@ skipped.analysis <- function(
         extract2(1)
       course <- course.tokens[1]
       lesson <- course.tokens[2]
-      lesson.src <- try(
-        yaml::yaml.load_file(file.path(course.source[[course]], lesson, "lesson.src.yaml")),
-        silent = TRUE
-      )
-      if (class(lesson.src) == "try-error") lesson.src <- try(
-        yaml::yaml.load_file(file.path(course.source[[course]], lesson, "lesson.yaml")),
-        silent = TRUE
-      )
-      if (class(lesson.src) == "try-error") stop(conditionMessage(attr(lesson.src, "condition")))
-      lesson.class <- sapply(lesson.src, "[[", "Class")
-      total.correct <- sum(lesson.class %in% c("script", "mult_question", "cmd_question"))
+      lesson.srcs <- course.source[[sprintf("%s:%s", course, lesson)]]
+      lesson.classes <- lapply(lesson.srcs, lapply, "[[", "Class")
       dplyr::group_by(., user_id) %>%
         dplyr::do({
           user_id.data <- .
@@ -72,7 +81,17 @@ skipped.analysis <- function(
             lapply(function(x) {
               if (length(x$correct) > length(x$skipped)) x$skipped <- c(FALSE, x$skipped)
               result <- x$skipped[x$correct]
-              data.frame(question.no = which(!lesson.class %in% c("meta", "text")), skipped = result)
+              .i <- which(
+                sapply(lesson.classes, function(lesson.class) {
+                  all(!lesson.class[x$question_number + 1] %in% c("meta", "text"))
+                }) &
+                  sapply(lesson.classes, function(lesson.class) {
+                    sum(x$correct) == sum(!lesson.class %in% c("meta", "text"))
+                  })
+                )
+              lesson.src <- lesson.srcs[[.i]]
+              lesson.class <- lesson.classes[[.i]]
+              data.frame(question.no = which(!lesson.class %in% c("meta", "text")), skipped = result, source.position = .i)
             }) %>%
             do.call(what = rbind)
         })
