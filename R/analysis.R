@@ -46,10 +46,10 @@ DSR.lessons <- sprintf(
 #'records <- get.records()
 #'skipped.result <- skipped.analysis(records)
 #'library(dplyr)
-#'group_by(skipped.result, course, question.no, user_id) %>%
+#'group_by(skipped.result, course, source.position, question.no, user_id) %>%
 #'  summarise(is.skipped = all(skipped)) %>% # if the student does not skip once, then I recognize that he/she did the question.
-#'  group_by(course, question.no) %>%
-#'  summarise(skip.ratio = mean(is.skipped)) %>%
+#'  group_by(course, source.position, question.no) %>%
+#'  summarise(skip.ratio = mean(is.skipped), count = length(is.skipped)) %>%
 #'  arrange(desc(skip.ratio))
 #'}
 skipped.analysis <- function(
