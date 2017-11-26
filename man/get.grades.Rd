@@ -27,6 +27,11 @@ A data.frame whose column is:
  \item{comment} {The detailed score of the student.}
 }
 }
+\details{
+If the student was late but he/she accomplished the course in \code{decay.gap} seconds after the threshold timestamp,
+then his/her score was multiplied by \code{1 - decay.ratio}.
+The discount will become heavier and heavier until the ratio become 0 or less.
+}
 \examples{
 \dontrun{
 # login first
