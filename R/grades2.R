@@ -91,3 +91,28 @@ update.grades.obj <- function(grades.obj, records, course.grades, due.time, deca
   .r
 }
 
+#'@export
+#'@param comments.obj list. Example: \code{grades.obj$comments[[user_id]]}.
+get.comment <- function(comments.obj) {
+  if ("finish.ontime" %in% names(comments.obj)) {
+    comments <- append(comments, sprintf("你在時限之內完成的單元： \n%s", comments.obj$finish.ontime %>% sprintf(fmt = "\t%s\n") %>% paste(collapse = "")))
+  }
+  if ("finish.delay" %in% names(comments.obj)) {
+    comments <- append(comments, sprintf("你遲交的單元： "))
+    comments <- append(
+      comments,
+      apply(comments.obj$finish.delay, 1, function(obj) {
+        sprintf("\t%s （遲交 %s 天，獲得的分數為： %s分）\n", obj["course"], obj["days"], obj["grades"])
+      }) %>%
+        paste(collapse = "")
+    )
+  }
+  if ("processing" %in% names(comments.obj)) {
+    comments <- append(comments, sprintf("你正在進行中的單元： \n%s", comments.obj$processing %>% sprintf(fmt = "\t%s\n") %>% paste(collapse = "")))
+  }
+  if ("no.action" %in% names(comments.obj)) {
+    comments <- append(comments, sprintf("你還沒有動作的單元： \n%s", comments.obj$no.action %>% sprintf(fmt = "\t%s\n") %>% paste(collapse = "")))
+  }
+  comments <- paste(comments, collapse = "\n")
+  comments
+}
