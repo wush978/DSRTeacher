@@ -94,6 +94,7 @@ update.grades.obj <- function(grades.obj, records, course.grades, due.time, deca
 #'@export
 #'@param comments.obj list. Example: \code{grades.obj$comments[[user_id]]}.
 get.comment <- function(comments.obj) {
+  comments <- ""
   if ("finish.ontime" %in% names(comments.obj)) {
     comments <- append(comments, sprintf("你在時限之內完成的單元： \n%s", comments.obj$finish.ontime %>% sprintf(fmt = "\t%s\n") %>% paste(collapse = "")))
   }
