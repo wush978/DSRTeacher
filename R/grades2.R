@@ -60,7 +60,7 @@ update.grades.obj <- function(grades.obj, records, course.grades, due.time, deca
       if (df1[[course.value]]$type == "O") {
         if (df1[[course.value]]$first < due.time) {
           grades[user] <- grades[user] + course.grades[course.value]
-          comments[[user]]$finish.ontime <- c(comments[[user]]$finish, course.value)
+          comments[[user]]$finish.ontime <- c(comments[[user]]$finish.ontime, course.value)
         } else {
           delay.days <- difftime(df1[[course.value]]$first, due.time, units = "days") %>%
             ceiling() %>%

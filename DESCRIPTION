@@ -1,7 +1,7 @@
 Package: DSRTeacher
 Type: Package
 Title: Export Tracking Data of Students from DataScienceAndR
-Version: 0.5
+Version: 0.5.1
 Author: Wush Wu
 Maintainer: Wush Wu <wush@datascienceandr.org>
 Description: Export Tracking Data of Students from DataScienceAndR
