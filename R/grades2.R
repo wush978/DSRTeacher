@@ -60,7 +60,16 @@ update.grades.obj <- function(grades.obj, records, course.grades, due.time, deca
       if (df1[[course.value]]$type == "O") {
         if (df1[[course.value]]$first < due.time) {
           grades[user] <- grades[user] + course.grades[course.value]
-          comments[[user]]$finish.ontime <- c(comments[[user]]$finish.ontime, course.value)
+#          comments[[user]]$finish.ontime <- c(comments[[user]]$finish.ontime, course.value)
+          comments[[user]]$finish.ontime <- rbind(
+            make.row.names = FALSE,
+            comments[[user]]$finish.ontime,
+            data.frame(
+              stringsAsFactors = FALSE,
+              course = course.value,
+              grades = course.grades[course.value]
+              )
+          )
         } else {
           delay.days <- difftime(df1[[course.value]]$first, due.time, units = "days") %>%
             ceiling() %>%
@@ -96,7 +105,7 @@ update.grades.obj <- function(grades.obj, records, course.grades, due.time, deca
 get.comment <- function(comments.obj) {
   comments <- ""
   if ("finish.ontime" %in% names(comments.obj)) {
-    comments <- append(comments, sprintf("你在時限之內完成的單元： \n%s", comments.obj$finish.ontime %>% sprintf(fmt = "\t%s\n") %>% paste(collapse = "")))
+    comments <- append(comments, sprintf("你在時限之內完成的單元： \n%s", sprintf(fmt = "\t%s（獲得的分數為： %s分）\n", comments.obj$finish.ontime$course, comments.obj$finish.ontime$grades) %>% paste(collapse = "")))
   }
   if ("finish.delay" %in% names(comments.obj)) {
     comments <- append(comments, sprintf("你遲交的單元： "))
