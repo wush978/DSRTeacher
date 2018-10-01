@@ -33,10 +33,10 @@
 #'records <- get.records()
 #'}
 #'@export
-login <- function(account) {
+login <- function(account, password = NULL) {
   .cookie <- try(.get_user_cookie(account))
   if (is.null(.cookie)) {
-    password <- getPass::getPass("password: ")
+    if (is.null(password)) password <- getPass::getPass("password: ")
     servers <- .get.servers()
     for(server in sample(servers)) {
       tryCatch({
